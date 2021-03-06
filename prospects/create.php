@@ -8,6 +8,7 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Access-Contro
 include_once '../config/config.php';
 include_once '../config/Database.php';
 include_once '../models/Prospect.php';
+include_once '../utilities/Response.php';
 
 $prospect1 = new Prospect();
 
@@ -19,23 +20,35 @@ foreach ($input as $item => $value ){
     $data[$item] = strip_tags($value);
 }
 
+//CREATE A NEW HEX ID WITH A total OF 10
+$data['_id'] = $prospect1->id = bin2hex(random_bytes(5));
+
+//CREATE A SLUG
+$string = $data['description']. " " .$data['client_ref'];
+$data['slug'] = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $string)));
+
+
 
 if($prospect1->createOne($data)){
-    header("HTTP/1.1 201 Created");
-    echo json_encode(
-        array(
-            "message" => "Document successfully Created",
-        )
-    );
+    //FETCH THE NEWLY CREATED DOCUMENT
+    $new_document = $prospect1->fetchOne();
+    //CREATE THE RESPONSE ARRAY TO BE DISPLAYED
+    $res = new Response();
+    $res->message = "Document successfully Created";
+    $res->data = $new_document;
+    $res->code = 201;
 }
-else{
-    header("HTTP/1.1 400 Bad Request");
-    echo json_encode(
-        array(
-            "message" => "Failed to create document",
-            "error"=> $prospect1->error
-        )
-    );
 
+else{
+    $res = new Response(1);
+    $res->message = "Failed to create document";
+    $res->error = $prospect1->error;
 }
+
+
+
+
+
+
+
 

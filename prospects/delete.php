@@ -8,17 +8,16 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Access-Contro
 include_once '../config/config.php';
 include_once '../config/Database.php';
 include_once '../models/Prospect.php';
+include_once '../utilities/Response.php';
+
+
 
 //CHECK IF ID IS SET
 $id = isset($_GET['id']) ? $_GET['id'] : false;
 if(!$id){
-    header("HTTP/1.1 400");
-    echo json_encode(
-        array(
-            "message" => "No id was specified"
-        )
-    );
-    die(400);
+    //create response
+    $res = new Response(1);
+    $res->message = "No id was specified";
 }
 else{
     //INITIATE A NEW MODEL
@@ -27,20 +26,15 @@ else{
     //EXECUTE deletion
     $prospect1->id = $id;
     if($prospect1->deleteOne()){
-        echo json_encode(
-            array(
-                "message" => "Document with Id ($id) successfully Deleted"
-            )
-        );
+        //create response
+        $res = new Response();
+        $res->message = "Document with Id ($id) successfully Deleted";
+
     }
     else{
-        header("HTTP/1.1 400");
-        echo json_encode(
-            array(
-                "message" => "Failed to Delete document",
-                "error"=> $prospect1->error
-            )
-        );
-
+        $res = new Response(1);
+        $res->message = "Failed to Delete document";
+        //CHECK IF THE ERROR WAS A 404
+        $res->error = $prospect1->error;
     }
 }

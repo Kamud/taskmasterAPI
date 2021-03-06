@@ -14,21 +14,19 @@ class Prospect
         "client_ref",
         "type",
         "document_fees",
+        "document_fees_currency",
         "publish_date",
         "closing_date",
-        "created_at"
+        "created_at",
+        "slug",
+        "modified_at"
+
     );
 
     public function __construct()
     {
         $this->db = new Database();
     }
-//    private function validate_id(){
-//        $sql = "SELECT _id FROM $this->table WHERE _id = '89gedf4c-4'";
-//        $this->db->query($sql);
-//        $this->db->bind('id', $this->id);
-//        print_r($this->db->rowCount());
-//    }
 
     public function fetchAll()
     {
@@ -37,36 +35,15 @@ class Prospect
         $this->db->query($sql);
         return $this->db->resultSet();
     }
-
     public function fetchOne()
     {
-        $sql = 'SELECT * FROM ' . $this->table . ' WHERE _id = :id';
+        $sql = "SELECT * FROM $this->table WHERE _id = :id";
         $this->db->query($sql);
         $this->db->bind('id', $this->id);
 
         return $this->db->single();
 
     }
-    public function deleteOne()
-    {
-        $id_is_valid = $this->db->check_id($this->table,$this->id);
-
-        if(!$id_is_valid){
-            $this->error = "The requested Id is not valid";
-            return false;
-        }
-
-        else{
-            $sql = 'DELETE FROM ' . $this->table . ' WHERE _id = :id';
-            $this->db->query($sql);
-            $this->db->bind('id', $this->id);
-            $this->db->execute();
-            return true;
-        }
-
-
-    }
-
     public function createOne($data)
     {
         //check if fields exist and prepare to execute query for only available fields
@@ -81,8 +58,6 @@ class Prospect
         }
 
         $sql = "INSERT into $this->table (".(implode(',',$this->fields)).") VALUES (:".implode(',:',$this->fields).")";
-        printf($sql);
-
         $this->db->query($sql);
 
         foreach ($this->fields as $field) {
@@ -97,8 +72,6 @@ class Prospect
             return false;
         }
     }
-
-
     public function upateOne($data)
     {
         //CHECK IF ID IS VALID FIRST
@@ -154,6 +127,25 @@ class Prospect
             }
 
         }
+    }
+    public function deleteOne()
+    {
+        $id_is_valid = $this->db->check_id($this->table,$this->id);
+
+        if(!$id_is_valid){
+            $this->error = "The requested Id is not valid";
+            return false;
+        }
+
+        else{
+            $sql = "DELETE FROM  $this->table  WHERE _id = :id";
+            $this->db->query($sql);
+            $this->db->bind('id', $this->id);
+            $this->db->execute();
+            return true;
+        }
+
+
     }
 
 }
