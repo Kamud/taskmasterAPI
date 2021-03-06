@@ -9,41 +9,38 @@ include_once '../config/config.php';
 include_once '../config/Database.php';
 include_once '../models/Prospect.php';
 
-$prospect1 = new Prospect();
-
-//CHECK IF ID IS AVAILABLE
+//CHECK IF ID IS SET
 $id = isset($_GET['id']) ? $_GET['id'] : false;
-
-//EXECUTE MULTIPLE OF SINGLE IF AN ID IS SET OR NOT
-if($id){
-    $prospect1->id = $id;
-}
-
-else{
+if(!$id){
+    header("HTTP/1.1 400");
     echo json_encode(
         array(
             "message" => "No id was specified"
         )
     );
-    die(401);
+    die(400);
 }
-$res = $prospect1->deleteOne();
-printf($res);
+else{
+    //INITIATE A NEW MODEL
+    $prospect1 = new Prospect();
 
-//if(){
-//    echo json_encode(
-//        array(
-//            "message" => "Document successfully Deleted"
-//        )
-//    );
-//}
-//else{
-//    echo json_encode(
-//        array(
-//            "message" => "Failed to delete document",
-//            "error"=> $prospect1->error
-//        )
-//    );
-//
-//}
+    //EXECUTE deletion
+    $prospect1->id = $id;
+    if($prospect1->deleteOne()){
+        echo json_encode(
+            array(
+                "message" => "Document with Id ($id) successfully Deleted"
+            )
+        );
+    }
+    else{
+        header("HTTP/1.1 400");
+        echo json_encode(
+            array(
+                "message" => "Failed to Delete document",
+                "error"=> $prospect1->error
+            )
+        );
 
+    }
+}

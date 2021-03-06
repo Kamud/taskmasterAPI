@@ -26,13 +26,18 @@ class Database{
         }
     }
 
-    public function id_is_valid($table,$id){
-        $sql = "SELECT * FROM prospects WHERE _id = '89gedf4c-4'";
-        $this->stmt = $this->dbh->query($sql);
-//        $this->stmt->bindParam('id',$id);
+    public function check_id($table,$id){
+        $sql = "SELECT * FROM $table WHERE _id = :id";
+        $this->stmt = $this->dbh->prepare($sql);
+        $this->stmt->bindParam('id',$id);
         $this->stmt->execute();
-        print_r($this->stmt->fetch(PDO::FETCH_ASSOC));
-//        return $this->stmt->rowCount();
+
+        if ($this->stmt->rowCount() < 1){
+            return false;
+        }
+        else{
+            return true;
+        }
     }
 
 
@@ -84,8 +89,6 @@ class Database{
     }
     //GET NUMBER OF MATCHED ROWS
     public function rowCount(){
-        $this->execute();
-        $x = $this->stmt->rowCount();
-        return $x;
+        return $this->stmt->rowCount();
     }
 }

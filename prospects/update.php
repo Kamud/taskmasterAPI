@@ -9,31 +9,30 @@ include_once '../config/config.php';
 include_once '../config/Database.php';
 include_once '../models/Prospect.php';
 
-$prospect1 = new Prospect();
 
-$input = json_decode(file_get_contents('php://input'));
-$data = array();
-
-//filter tags from input
-foreach ($input as $item => $value ){
-    $data[$item] = strip_tags($value);
-}
-
-//CHECK IF ID IS AVAILABLE
+//CHECK IF ID IS SET
 $id = isset($_GET['id']) ? $_GET['id'] : false;
-
-//EXECUTE MULTIPLE OF SINGLE IF AN ID IS SET OR NOT
 if(!$id){
-    header("HTTP/1.1 403 Bad Request");
+    header("HTTP/1.1 400");
     echo json_encode(
         array(
             "message" => "No id was specified"
         )
     );
-    die(401);
+    die(400);
 }
-
 else{
+    //INITIATE A NEW MODEL, GET USER INPUT AND INITIALIZE AN EMPTY DATA ARRAY
+    $prospect1 = new Prospect();
+    $input = json_decode(file_get_contents('php://input'));
+    $data = array();
+
+    //filter tags from input
+    foreach ($input as $item => $value ){
+        $data[$item] = strip_tags($value);
+    }
+
+    //EXECUTE UPDATE
     $prospect1->id = $id;
     if($prospect1->upateOne($data)){
         echo json_encode(
@@ -43,6 +42,7 @@ else{
         );
     }
     else{
+        header("HTTP/1.1 400");
         echo json_encode(
             array(
                 "message" => "Failed to update document",
@@ -52,8 +52,3 @@ else{
 
     }
 }
-
-
-
-
-

@@ -20,14 +20,16 @@ foreach ($input as $item => $value ){
 }
 
 
-if($prospect1->addOne($data)){
+if($prospect1->createOne($data)){
+    header("HTTP/1.1 201 Created");
     echo json_encode(
         array(
-            "message" => "Document successfully Created"
+            "message" => "Document successfully Created",
         )
     );
 }
 else{
+    header("HTTP/1.1 400 Bad Request");
     echo json_encode(
         array(
             "message" => "Failed to create document",

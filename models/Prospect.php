@@ -5,7 +5,7 @@ class Prospect
 {
     public $id;
     public $error;
-    private $db;
+    public $db;
     private $table = 'prospects';
     private $fields = array(
         "_id",
@@ -19,18 +19,16 @@ class Prospect
         "created_at"
     );
 
+    public function __construct()
+    {
+        $this->db = new Database();
+    }
 //    private function validate_id(){
 //        $sql = "SELECT _id FROM $this->table WHERE _id = '89gedf4c-4'";
 //        $this->db->query($sql);
 //        $this->db->bind('id', $this->id);
 //        print_r($this->db->rowCount());
 //    }
-
-
-    public function __construct()
-    {
-        $this->db = new Database();
-    }
 
     public function fetchAll()
     {
@@ -51,21 +49,25 @@ class Prospect
     }
     public function deleteOne()
     {
+        $id_is_valid = $this->db->check_id($this->table,$this->id);
 
-        $sql = 'DELETE FROM ' . $this->table . ' WHERE _id = :id';
-        $this->db->query($sql);
-        $this->db->bind('id', $this->id);
-
-        try {
-             echo $this->db->execute();
-        }
-        catch (PDOException $e) {
-            $this->error = $e->getMessage();
+        if(!$id_is_valid){
+            $this->error = "The requested Id is not valid";
             return false;
         }
+
+        else{
+            $sql = 'DELETE FROM ' . $this->table . ' WHERE _id = :id';
+            $this->db->query($sql);
+            $this->db->bind('id', $this->id);
+            $this->db->execute();
+            return true;
+        }
+
+
     }
 
-    public function addOne($data)
+    public function createOne($data)
     {
         //check if fields exist and prepare to execute query for only available fields
         $i = 0;
@@ -95,42 +97,62 @@ class Prospect
             return false;
         }
     }
+
+
     public function upateOne($data)
     {
-        //check if fields exist and prepare to execute query for only available fields
-        $i = 0;
-        $length = count($this->fields);
-        while ($i < $length) {
-            if (!array_key_exists($this->fields[$i], $data)) {
-                //REMOVE THE FIELD FROM THE FIELDS ARRAY
-                unset($this->fields[$i]);
-            }
-            $i++;
-        }
+        //CHECK IF ID IS VALID FIRST
+        $id_is_valid = $this->db->check_id($this->table,$this->id);
 
-        //CREATE AN UPDATE STRING
-        $update_string = "";
-
-        foreach ($this->fields as $field){
-            $update_string = $update_string."$field = :$field, ";
-        }
-        $update_string = substr_replace($update_string,"",-2);
-
-        print_r($this->db->id_is_valid($this->table,$this->id));
-        $sql = "UPDATE $this->table SET $update_string WHERE _id = '".$this->id."'";
-        $this->db->query($sql);
-
-        //BIND PARAMETER
-        foreach ($this->fields as $field) {
-            $this->db->bind($field, $data[$field]);
-        }
-
-        try {
-            $this->db->execute();
-            return true;
-        } catch (PDOException $e) {
-            $this->error = $e->getMessage();
+        if(!$id_is_valid){
+            $this->error = "The requested Id is not valid";
             return false;
+        }
+        else{
+            //UPDATE THE DOCUMENT
+            //check if fields exist and prepare to execute query for only available fields
+            $i = 0;
+
+            //PREVENT ID FROM UPDATING by REMOVING IT FROM FIELDS
+            array_shift($this->fields);
+
+            $length = count($this->fields);
+            while ($i < $length) {
+                if (!array_key_exists($this->fields[$i], $data)) {
+                    //REMOVE THE FIELD FROM THE FIELDS ARRAY
+                    unset($this->fields[$i]);
+                }
+                $i++;
+            }
+
+
+
+            //CREATE AN UPDATE STRING
+            $update_string = "";
+
+            foreach ($this->fields as $field){
+                $update_string = $update_string."$field = :$field, ";
+            }
+            //REMOVE COMMA AT END OF STRING
+            $update_string = substr_replace($update_string,"",-2);
+
+            //RUN QUERY
+            $sql = "UPDATE $this->table SET $update_string WHERE _id = '".$this->id."'";
+            $this->db->query($sql);
+
+            //BIND PARAMETER
+            foreach ($this->fields as $field) {
+                $this->db->bind($field, $data[$field]);
+            }
+
+            try {
+                $this->db->execute();
+                return true;
+            } catch (PDOException $e) {
+                $this->error = $e->getMessage();
+                return false;
+            }
+
         }
     }
 
