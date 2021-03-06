@@ -23,12 +23,22 @@ $id = isset($_GET['id']) ? $_GET['id'] : false;
 if($id){
     $prospect1->id = $id;
     unset($res['count']);
-    $res['data'] = $prospect1->fetchOne();
+    $result = $prospect1->fetchOne();
+
+    if(!$result){
+        $res['status'] = 'fail';
+        $res['error'] = "Id not found";
+        header("HTTP/1.1 404 Not Found");
+    }
+
+    else{
+        $res['data'] = $result;
+    }
 }
+
 else{
     $res['data'] = $prospect1->fetchAll();
     $res['count'] = count($res['data']);
 }
-
 
 echo json_encode($res);

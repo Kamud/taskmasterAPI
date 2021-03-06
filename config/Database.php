@@ -26,6 +26,15 @@ class Database{
         }
     }
 
+    public function id_is_valid($table,$id){
+        $sql = "SELECT * FROM prospects WHERE _id = '89gedf4c-4'";
+        $this->stmt = $this->dbh->query($sql);
+//        $this->stmt->bindParam('id',$id);
+        $this->stmt->execute();
+        print_r($this->stmt->fetch(PDO::FETCH_ASSOC));
+//        return $this->stmt->rowCount();
+    }
+
 
     // Prepare statement with query
     public function query($sql){
@@ -66,13 +75,17 @@ class Database{
     // Get single record as object
     public function single(){
         $this->execute();
-        print_r($this->stmt->fetch(PDO::FETCH_OBJ));
-//        return $this->stmt->fetch(PDO::FETCH_OBJ);
+        if($this->stmt->rowCount() === 0){
+            return false;
+        }
+        else{
+            return $this->stmt->fetch(PDO::FETCH_OBJ);
+        }
     }
-
-    // Get row count
+    //GET NUMBER OF MATCHED ROWS
     public function rowCount(){
-        return $this->stmt->rowCount();
+        $this->execute();
+        $x = $this->stmt->rowCount();
+        return $x;
     }
-
 }

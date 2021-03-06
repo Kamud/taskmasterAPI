@@ -19,13 +19,12 @@ class Prospect
         "created_at"
     );
 
-    private function checkIdValidity(){
-        $sql = "SELECT _id FROM $this->table WHERE _id = :id";
-        $this->db->query($sql);
-        $this->db->bind('id', $this->id);
-
-        print_r($this->db->single());
-    }
+//    private function validate_id(){
+//        $sql = "SELECT _id FROM $this->table WHERE _id = '89gedf4c-4'";
+//        $this->db->query($sql);
+//        $this->db->bind('id', $this->id);
+//        print_r($this->db->rowCount());
+//    }
 
 
     public function __construct()
@@ -38,13 +37,11 @@ class Prospect
 
         $sql = "SELECT * FROM $this->table ORDER BY created_at DESC";
         $this->db->query($sql);
-
         return $this->db->resultSet();
     }
 
     public function fetchOne()
     {
-        echo $this->checkIdValidity();
         $sql = 'SELECT * FROM ' . $this->table . ' WHERE _id = :id';
         $this->db->query($sql);
         $this->db->bind('id', $this->id);
@@ -117,12 +114,10 @@ class Prospect
         foreach ($this->fields as $field){
             $update_string = $update_string."$field = :$field, ";
         }
-
         $update_string = substr_replace($update_string,"",-2);
 
+        print_r($this->db->id_is_valid($this->table,$this->id));
         $sql = "UPDATE $this->table SET $update_string WHERE _id = '".$this->id."'";
-
-        echo $sql;
         $this->db->query($sql);
 
         //BIND PARAMETER

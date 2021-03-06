@@ -23,11 +23,8 @@ foreach ($input as $item => $value ){
 $id = isset($_GET['id']) ? $_GET['id'] : false;
 
 //EXECUTE MULTIPLE OF SINGLE IF AN ID IS SET OR NOT
-if($id){
-    $prospect1->id = $id;
-}
-
-else{
+if(!$id){
+    header("HTTP/1.1 403 Bad Request");
     echo json_encode(
         array(
             "message" => "No id was specified"
@@ -36,20 +33,27 @@ else{
     die(401);
 }
 
-if($prospect1->upateOne($data)){
-    echo json_encode(
-        array(
-            "message" => "Document successfully Updated"
-        )
-    );
-}
 else{
-    echo json_encode(
-        array(
-            "message" => "Failed to update document",
-            "error"=> $prospect1->error
-        )
-    );
+    $prospect1->id = $id;
+    if($prospect1->upateOne($data)){
+        echo json_encode(
+            array(
+                "message" => "Document successfully Updated"
+            )
+        );
+    }
+    else{
+        echo json_encode(
+            array(
+                "message" => "Failed to update document",
+                "error"=> $prospect1->error
+            )
+        );
 
+    }
 }
+
+
+
+
 

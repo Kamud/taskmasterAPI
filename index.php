@@ -8,7 +8,11 @@ include_once './config/Database.php';
 include_once './models/Prospect.php';
 
 
-$prospect1 = new Prospect();
+$prospect1 = new Database();
 
-$res = $prospect1->fetchAll();
+$res = $prospect1->test();
+
+echo json_encode($res);
+
+
 
