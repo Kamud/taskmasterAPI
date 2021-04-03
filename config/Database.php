@@ -74,7 +74,18 @@ class Database{
     // Get result set as array of objects
     public function resultSet(){
         $this->execute();
-        return $this->stmt->fetchAll(PDO::FETCH_OBJ);
+
+        $results = $this->stmt->fetchAll(PDO::FETCH_OBJ);
+
+        //FILTER COLUMNS WITH NULL VALUES
+        foreach ($results as $result){
+            foreach ($result as $key => $value){
+                if($value === null){
+                    unset($result->$key );
+                }
+            }
+        }
+        return  $results;
     }
 
     // Get single record as object
@@ -84,7 +95,13 @@ class Database{
             return false;
         }
         else{
-            return $this->stmt->fetch(PDO::FETCH_OBJ);
+            $result = $this->stmt->fetch(PDO::FETCH_OBJ);
+            foreach ($result as $key => $value){
+                if($value === null || $value === ''){
+                    unset($result->$key );
+                }
+            }
+            return $result;
         }
     }
     //GET NUMBER OF MATCHED ROWS

@@ -1,35 +1,24 @@
 <?php
 
 
-class Prospect
+class User
 {
     public $id;
+    public $email;
+    public $password;
     public $error;
     public $db;
-    private $table = 'prospects';
+    private $table = 'users';
     private $fields = array(
         "_id",
-        "category",
-        "organisation",
-        "description",
-        "client_ref",
-        "slug",
-        "type",
-        "status",
-        "status_description",
-        "document_src_type",
-        "document_src_email",
-        "document_fees",
-        "document_fees_currency",
-        "bind_bond",
-        "bind_bond_currency",
-        "publish_date",
-        "closing_date",
+        "user_name",
+        "first_name",
+        "last_name",
+        "email",
+        "last_login",
         "created_at",
         "modified_at"
     );
-
-
 
     public function __construct()
     {
@@ -39,7 +28,7 @@ class Prospect
     public function fetchAll()
     {
 
-        $sql = "SELECT * FROM $this->table ORDER BY created_at DESC";
+        $sql = "SELECT * FROM $this->table ORDER BY created_at ASC";
         $this->db->query($sql);
         return $this->db->resultSet();
     }
@@ -153,7 +142,22 @@ class Prospect
             return true;
         }
 
+    }
+    public function requestUser(){
+        $sql = "SELECT * FROM users WHERE email = :email";
+        $this->db->query($sql);
+        $this->db->bind('email', $this->email);
+        $result = $this->db->single();
 
+        return $result? true : false;
+    }
+    public function authenticateUser(){
+        $sql = "SELECT * FROM users WHERE email = :email AND password = :password";
+        $this->db->query($sql);
+        $this->db->bind('email', $this->email);
+        $this->db->bind('password', $this->password);
+        $result = $this->db->single();
+        return $result? true : false;
     }
 
 }

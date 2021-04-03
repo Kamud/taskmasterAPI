@@ -1,35 +1,24 @@
 <?php
 
 
-class Prospect
+class Estimate
 {
     public $id;
     public $error;
     public $db;
-    private $table = 'prospects';
+    private $table = 'estimates';
     private $fields = array(
         "_id",
+        "assignment_id",
         "category",
-        "organisation",
-        "description",
-        "client_ref",
-        "slug",
-        "type",
+        "quote_price",
+        "quote_currency",
+        "quote_ref",
         "status",
         "status_description",
-        "document_src_type",
-        "document_src_email",
-        "document_fees",
-        "document_fees_currency",
-        "bind_bond",
-        "bind_bond_currency",
-        "publish_date",
-        "closing_date",
         "created_at",
         "modified_at"
     );
-
-
 
     public function __construct()
     {
@@ -39,15 +28,24 @@ class Prospect
     public function fetchAll()
     {
 
-        $sql = "SELECT * FROM $this->table ORDER BY created_at DESC";
+        $sql = "SELECT estimates._id, estimates.assignment_id,estimates.category, estimates.quote_price, estimates.quote_currency, estimates.quote_ref,
+                estimates.status,estimates.status_description,estimates.created_at,estimates.modified_at,
+                assignments.description, assignments.client_ref, assignments._id AS assignment_id, assignments.organisation FROM estimates 
+                INNER JOIN assignments ON estimates.assignment_id = assignments._id
+                ORDER BY estimates.created_at DESC";
+//        $sql = "SELECT * FROM $this->table ORDER BY created_at DESC";
         $this->db->query($sql);
         return $this->db->resultSet();
     }
     public function fetchOne()
     {
-        $sql = "SELECT * FROM $this->table WHERE _id = :id";
+        $sql = "SELECT estimates._id, estimates.assignment_id,estimates.category, estimates.quote_price, estimates.quote_currency, estimates.quote_ref,
+                estimates.status,estimates.status_description,estimates.created_at,estimates.modified_at,
+                assignments.description,assignments.client_ref, assignments._id AS assignment_id, assignments.status, assignments.organisation FROM estimates 
+                INNER JOIN assignments ON estimates.assignment_id = assignments._id
+                ";
         $this->db->query($sql);
-        $this->db->bind('id', $this->id);
+//        $this->db->bind('id', $this->id);
 
         return $this->db->single();
 
@@ -152,7 +150,6 @@ class Prospect
             $this->db->execute();
             return true;
         }
-
 
     }
 

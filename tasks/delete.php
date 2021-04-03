@@ -7,7 +7,7 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Access-Contro
 
 include_once '../config/config.php';
 include_once '../config/Database.php';
-include_once '../models/Prospect.php';
+include_once '../models/Task.php';
 include_once '../models/Pinned.php';
 include_once '../utilities/Response.php';
 
@@ -22,26 +22,25 @@ if(!$id){
 }
 else{
     //INITIATE A NEW MODEL
-    $prospect1 = new Prospect();
-    $res = new Response();
-
-
-
-
+    $task1 = new Task();
     //EXECUTE deletion
-    $prospect1->id = $id;
-    if($prospect1->deleteOne()){
-        //create response
+    $task1->id = $id;
+
+    //create response
+    if($task1->deleteOne()){
+        echo "DELETED";
+        $res = new Response();
         $res->message= deletePinnedItem($id)?
-            "Document with Id ($id) successfully Deleted + pinned":
-            "Document with Id ($id) successfully Deleted";
+                        "Document with Id ($id) successfully Deleted + pinned":
+                        "Document with Id ($id) successfully Deleted";
+        return;
 
     }
     else{
         $res = new Response(1);
         $res->message = "Failed to Delete document";
         //CHECK IF THE ERROR WAS A 404
-        $res->error = $prospect1->error;
+        $res->error = $task1->error;
     }
 }
 

@@ -1,35 +1,46 @@
 <?php
 
 
-class Prospect
+class Assignment
 {
     public $id;
     public $error;
     public $db;
-    private $table = 'prospects';
+    private $table = 'assignments';
     private $fields = array(
         "_id",
         "category",
         "organisation",
         "description",
         "client_ref",
-        "slug",
         "type",
+        "slug",
+        "publish_date",
+        "closing_date",
         "status",
         "status_description",
+        "submission_date",
         "document_src_type",
         "document_src_email",
         "document_fees",
         "document_fees_currency",
-        "bind_bond",
-        "bind_bond_currency",
-        "publish_date",
-        "closing_date",
+        "bid_bond",
+        "bid_bond_currency",
+        "awarded_on",
+        "awarded_to",
+        "awarded_price",
         "created_at",
         "modified_at"
     );
 
-
+    private $fieldsToCheck = array(
+        "document_src_type",
+        "document_src_email",
+        "document_fees",
+        "document_fees_currency",
+        "bid_bond",
+        "bid_bond_currency",
+    );
 
     public function __construct()
     {
@@ -91,12 +102,19 @@ class Prospect
         }
         else{
             //UPDATE THE DOCUMENT
-            //check if fields exist and prepare to execute query for only available fields
-            $i = 0;
-
             //PREVENT ID FROM UPDATING by REMOVING IT FROM FIELDS
             array_shift($this->fields);
 
+            //EVALUATE IF THE DOCUMENT SOURCE FIELDS ARE AVAILABLE OR SEND THEM AS NULL
+            foreach ($this->fieldsToCheck as $field){
+                if (!array_key_exists($field, $data)) {
+                    //ADD THEM AS NULL
+                    $data[$field] = null;
+                }
+            }
+
+            //check if fields exist and prepare to execute query for only available fields
+            $i = 0;
             $length = count($this->fields);
             while ($i < $length) {
                 if (!array_key_exists($this->fields[$i], $data)) {
@@ -106,7 +124,14 @@ class Prospect
                 $i++;
             }
 
-
+            //EVALUATE IF THE DOCUMENT SOURCE FIELDS ARE AVAILABLE OR SEND THEM AS NULL
+            while ($i < count($this->fieldsToCheck)) {
+                if (!array_key_exists($this->fieldsToCheck[$i], $data)) {
+                    //ADD THEM AS NULL
+                    unset($this->fields[$i]);
+                }
+                $i++;
+            }
 
             //CREATE AN UPDATE STRING
             $update_string = "";
@@ -116,6 +141,7 @@ class Prospect
             }
             //REMOVE COMMA AT END OF STRING
             $update_string = substr_replace($update_string,"",-2);
+
 
             //RUN QUERY
             $sql = "UPDATE $this->table SET $update_string WHERE _id = '".$this->id."'";
@@ -152,7 +178,6 @@ class Prospect
             $this->db->execute();
             return true;
         }
-
 
     }
 

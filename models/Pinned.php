@@ -1,51 +1,71 @@
 <?php
 
+include_once '../utilities/Populater.php';
 
-class Prospect
+class Pinned
 {
     public $id;
     public $error;
     public $db;
-    private $table = 'prospects';
+    private $table = 'pinned';
     private $fields = array(
         "_id",
-        "category",
-        "organisation",
-        "description",
-        "client_ref",
-        "slug",
-        "type",
-        "status",
-        "status_description",
-        "document_src_type",
-        "document_src_email",
-        "document_fees",
-        "document_fees_currency",
-        "bind_bond",
-        "bind_bond_currency",
-        "publish_date",
-        "closing_date",
-        "created_at",
-        "modified_at"
+        "resource_id",
+        "resource_category",
+        "pinned_at",
     );
-
-
 
     public function __construct()
     {
         $this->db = new Database();
     }
 
-    public function fetchAll()
+    public function fetchAll($filter = false)
     {
+        //CHECK IF FILTER IS SET
+        if($filter){
+            $key = $filter->key;
+            $value = $filter->value;
+            $sql= "SELECT _id AS pinned_item_id, resource_id, resource_category,pinned_at FROM $this->table WHERE $key = :value ORDER BY pinned_at DESC ";
+        }
+        else{
+            $sql= "SELECT _id AS pinned_item_id, resource_id, resource_category,pinned_at FROM $this->table ORDER BY pinned_at DESC ";
+        }
 
-        $sql = "SELECT * FROM $this->table ORDER BY created_at DESC";
+
         $this->db->query($sql);
-        return $this->db->resultSet();
+        $filter && $this->db->bind('value',$value);
+        //GET THE INITIAL RESULT OF PINNED ITEMS ONLY
+        $firstBatch = $this->db->resultSet();
+
+        //PRE CREATE A RESULT ARRAY BATCH
+        $populater = new Populater();
+        $result = array();
+
+        foreach ($firstBatch as $item){
+            $populatedItem = $populater->fetchResource($item->resource_id,$item->resource_category);
+            $mergedObject = (object)array_merge((array)$item,(array)$populatedItem);
+
+            //DELETE THE ID FIELD FROM THE MERGED OBJECT
+            unset($mergedObject->_id);
+            array_push($result,$mergedObject);
+        }
+
+        return $result;
+
+
     }
     public function fetchOne()
     {
         $sql = "SELECT * FROM $this->table WHERE _id = :id";
+        $this->db->query($sql);
+        $this->db->bind('id', $this->id);
+
+        return $this->db->single();
+
+    }    public function fetchByResourceId()
+    {
+        $sql = "SELECT * FROM $this->table WHERE resource_id = :id";
         $this->db->query($sql);
         $this->db->bind('id', $this->id);
 
@@ -141,7 +161,7 @@ class Prospect
         $id_is_valid = $this->db->check_id($this->table,$this->id);
 
         if(!$id_is_valid){
-            $this->error = "The requested Id is not valid";
+            $this->error = "The requested Id ($this->id) is not valid";
             return false;
         }
 
@@ -152,8 +172,13 @@ class Prospect
             $this->db->execute();
             return true;
         }
-
+    }
+    public function deleteByResourceId($resource_id)
+    {
+        $sql = "DELETE FROM  $this->table  WHERE resource_id = :id";
+        $this->db->query($sql);
+        $this->db->bind('id', $resource_id);
+        return $this->db->execute();
 
     }
-
 }

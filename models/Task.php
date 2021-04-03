@@ -1,35 +1,22 @@
 <?php
 
 
-class Prospect
+class Task
 {
     public $id;
     public $error;
     public $db;
-    private $table = 'prospects';
+    private $table = 'tasks';
     private $fields = array(
         "_id",
-        "category",
-        "organisation",
         "description",
-        "client_ref",
-        "slug",
-        "type",
         "status",
         "status_description",
-        "document_src_type",
-        "document_src_email",
-        "document_fees",
-        "document_fees_currency",
-        "bind_bond",
-        "bind_bond_currency",
-        "publish_date",
+        "assigned_user_id",
         "closing_date",
         "created_at",
         "modified_at"
     );
-
-
 
     public function __construct()
     {
@@ -38,14 +25,25 @@ class Prospect
 
     public function fetchAll()
     {
+        $sql = "SELECT tasks._id, tasks.description, tasks.category,tasks.status_description, tasks.status, tasks.assigned_user_id ,tasks.closing_date,
+                tasks.created_at,tasks.modified_at,
+                users.user_name AS assigned_user_name, users.email AS assigned_user_email,users._id AS assigned_user_id FROM tasks
+                INNER JOIN users ON tasks.assigned_user_id = users._id
+                ORDER BY tasks.created_at DESC";
 
-        $sql = "SELECT * FROM $this->table ORDER BY created_at DESC";
+//        $sql = "SELECT * FROM $this->table ORDER BY created_at DESC";
         $this->db->query($sql);
         return $this->db->resultSet();
     }
     public function fetchOne()
     {
-        $sql = "SELECT * FROM $this->table WHERE _id = :id";
+        $sql = "SELECT tasks._id, tasks.description,tasks.category,tasks.status_description, tasks.status, tasks.assigned_user_id, tasks.closing_date,
+                tasks.created_at,tasks.modified_at,
+                users.user_name AS assigned_user_name, users.email AS assigned_user_email,users._id AS assigned_user_id FROM tasks
+                INNER JOIN users ON tasks.assigned_user_id = users._id
+                WHERE tasks._id = :id";
+
+//        $sql = "SELECT * FROM $this->table WHERE _id = :id";
         $this->db->query($sql);
         $this->db->bind('id', $this->id);
 
@@ -141,18 +139,19 @@ class Prospect
         $id_is_valid = $this->db->check_id($this->table,$this->id);
 
         if(!$id_is_valid){
-            $this->error = "The requested Id is not valid";
+            echo "Id is not valid";
+            $this->error = "The requested Id ($this->id) is not valid and could not be deleted";
             return false;
         }
 
         else{
+            echo "attempting to delete document";
             $sql = "DELETE FROM  $this->table  WHERE _id = :id";
             $this->db->query($sql);
             $this->db->bind('id', $this->id);
             $this->db->execute();
             return true;
         }
-
 
     }
 
