@@ -32,9 +32,9 @@ else{
     $prospect1->id = $id;
     if($prospect1->deleteOne()){
         //create response
-        $res->message= deletePinnedItem($id)?
-            "Document with Id ($id) successfully Deleted + pinned":
-            "Document with Id ($id) successfully Deleted";
+        deletePinnedItem($id);
+        $res->message= "Document with Id ($id) successfully Deleted";
+        return;
 
     }
     else{

@@ -136,23 +136,12 @@ class Task
     }
     public function deleteOne()
     {
-        $id_is_valid = $this->db->check_id($this->table,$this->id);
 
-        if(!$id_is_valid){
-            echo "Id is not valid";
-            $this->error = "The requested Id ($this->id) is not valid and could not be deleted";
-            return false;
-        }
+        $sql = "DELETE FROM  $this->table  WHERE _id = :id";
+        $this->db->query($sql);
+        $this->db->bind('id', $this->id);
 
-        else{
-            echo "attempting to delete document";
-            $sql = "DELETE FROM  $this->table  WHERE _id = :id";
-            $this->db->query($sql);
-            $this->db->bind('id', $this->id);
-            $this->db->execute();
-            return true;
-        }
-
+        return $this->db->execute();
     }
 
 }

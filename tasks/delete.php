@@ -28,11 +28,9 @@ else{
 
     //create response
     if($task1->deleteOne()){
-        echo "DELETED";
         $res = new Response();
-        $res->message= deletePinnedItem($id)?
-                        "Document with Id ($id) successfully Deleted + pinned":
-                        "Document with Id ($id) successfully Deleted";
+        deletePinnedItem($id);
+        $res->message= "Document with Id ($id) successfully Deleted";
         return;
 
     }

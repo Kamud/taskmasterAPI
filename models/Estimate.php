@@ -16,6 +16,7 @@ class Estimate
         "quote_ref",
         "status",
         "status_description",
+        "closing_date",
         "created_at",
         "modified_at"
     );
@@ -29,7 +30,7 @@ class Estimate
     {
 
         $sql = "SELECT estimates._id, estimates.assignment_id,estimates.category, estimates.quote_price, estimates.quote_currency, estimates.quote_ref,
-                estimates.status,estimates.status_description,estimates.created_at,estimates.modified_at,
+                estimates.status,estimates.status_description,estimates.closing_date,estimates.created_at,estimates.modified_at,
                 assignments.description, assignments.client_ref, assignments._id AS assignment_id, assignments.organisation FROM estimates 
                 INNER JOIN assignments ON estimates.assignment_id = assignments._id
                 ORDER BY estimates.created_at DESC";
@@ -40,9 +41,9 @@ class Estimate
     public function fetchOne()
     {
         $sql = "SELECT estimates._id, estimates.assignment_id,estimates.category, estimates.quote_price, estimates.quote_currency, estimates.quote_ref,
-                estimates.status,estimates.status_description,estimates.created_at,estimates.modified_at,
+                estimates.status,estimates.status_description,estimates.closing_date,estimates.created_at,estimates.modified_at,
                 assignments.description,assignments.client_ref, assignments._id AS assignment_id, assignments.status, assignments.organisation FROM estimates 
-                INNER JOIN assignments ON estimates.assignment_id = assignments._id
+                INNER JOIN assignments ON estimates.assignment_id = assignments._id WHERE estimates._id = '".$this->id."'
                 ";
         $this->db->query($sql);
 //        $this->db->bind('id', $this->id);
@@ -50,8 +51,20 @@ class Estimate
         return $this->db->single();
 
     }
+
+    private function getClosingDate($date){
+        $oldDate = $date;
+        $newDate = new DateTime($oldDate);
+        $newDate->add(new DateInterval('P14D')); // P1D means a period of 1 day
+        $fomattedDate = $newDate->format('Y-m-d h:i');
+        return $fomattedDate;
+
+    }
     public function createOne($data)
     {
+
+        //CREATE A CLOSING DATE OF 2 WEEKS AFTER CREATION
+        $data['closing_date'] = $this->getClosingDate($data['created_at']);
         //check if fields exist and prepare to execute query for only available fields
         $i = 0;
         $length = count($this->fields);
@@ -62,7 +75,6 @@ class Estimate
             }
             $i++;
         }
-
         $sql = "INSERT into $this->table (".(implode(',',$this->fields)).") VALUES (:".implode(',:',$this->fields).")";
         $this->db->query($sql);
 
@@ -136,21 +148,12 @@ class Estimate
     }
     public function deleteOne()
     {
-        $id_is_valid = $this->db->check_id($this->table,$this->id);
 
-        if(!$id_is_valid){
-            $this->error = "The requested Id is not valid";
-            return false;
-        }
+        $sql = "DELETE FROM  $this->table  WHERE _id = :id";
+        $this->db->query($sql);
+        $this->db->bind('id', $this->id);
 
-        else{
-            $sql = "DELETE FROM  $this->table  WHERE _id = :id";
-            $this->db->query($sql);
-            $this->db->bind('id', $this->id);
-            $this->db->execute();
-            return true;
-        }
-
+        return $this->db->execute();
     }
 
 }

@@ -1,46 +1,37 @@
 <?php
 
 
-class Assignment
+class Archive
 {
     public $id;
     public $error;
     public $db;
-    private $table = 'assignments';
+    private $table = 'archives';
     private $fields = array(
         "_id",
         "category",
+        "resource_id",
+        "resource_category",
         "organisation",
         "description",
         "client_ref",
         "type",
-        "slug",
-        "publish_date",
-        "closing_date",
         "status",
         "status_description",
-        "submission_date",
+        "assigned_user_id",
         "document_src_type",
         "document_src_email",
         "document_fees",
         "document_fees_currency",
-        "bid_bond",
-        "bid_bond_currency",
-        "awarded_on",
-        "awarded_to",
-        "awarded_price",
+        "bind_bond",
+        "bind_bond_currency",
+        "publish_date",
+        "closing_date",
         "created_at",
         "modified_at"
     );
 
-    private $fieldsToCheck = array(
-        "document_src_type",
-        "document_src_email",
-        "document_fees",
-        "document_fees_currency",
-        "bid_bond",
-        "bid_bond_currency",
-    );
+
 
     public function __construct()
     {
@@ -102,19 +93,12 @@ class Assignment
         }
         else{
             //UPDATE THE DOCUMENT
+            //check if fields exist and prepare to execute query for only available fields
+            $i = 0;
+
             //PREVENT ID FROM UPDATING by REMOVING IT FROM FIELDS
             array_shift($this->fields);
 
-            //EVALUATE IF THE DOCUMENT SOURCE FIELDS ARE AVAILABLE OR SEND THEM AS NULL
-            foreach ($this->fieldsToCheck as $field){
-                if (!array_key_exists($field, $data)) {
-                    //ADD THEM AS NULL
-                    $data[$field] = null;
-                }
-            }
-
-            //check if fields exist and prepare to execute query for only available fields
-            $i = 0;
             $length = count($this->fields);
             while ($i < $length) {
                 if (!array_key_exists($this->fields[$i], $data)) {
@@ -124,14 +108,7 @@ class Assignment
                 $i++;
             }
 
-            //EVALUATE IF THE DOCUMENT SOURCE FIELDS ARE AVAILABLE OR SEND THEM AS NULL
-            while ($i < count($this->fieldsToCheck)) {
-                if (!array_key_exists($this->fieldsToCheck[$i], $data)) {
-                    //ADD THEM AS NULL
-                    unset($this->fields[$i]);
-                }
-                $i++;
-            }
+
 
             //CREATE AN UPDATE STRING
             $update_string = "";
@@ -141,7 +118,6 @@ class Assignment
             }
             //REMOVE COMMA AT END OF STRING
             $update_string = substr_replace($update_string,"",-2);
-
 
             //RUN QUERY
             $sql = "UPDATE $this->table SET $update_string WHERE _id = '".$this->id."'";
@@ -165,11 +141,11 @@ class Assignment
     public function deleteOne()
     {
 
-            $sql = "DELETE FROM  $this->table  WHERE _id = :id";
-            $this->db->query($sql);
-            $this->db->bind('id', $this->id);
+        $sql = "DELETE FROM  $this->table  WHERE _id = :id";
+        $this->db->query($sql);
+        $this->db->bind('id', $this->id);
 
-            return $this->db->execute();
+        return $this->db->execute();
     }
 
 }

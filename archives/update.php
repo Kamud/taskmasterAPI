@@ -7,7 +7,7 @@ header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Access-Contro
 
 include_once '../config/config.php';
 include_once '../config/Database.php';
-include_once '../models/Task.php';
+include_once '../models/Archive.php';
 include_once '../utilities/Response.php';
 
 //CHECK IF ID IS SET
@@ -18,8 +18,8 @@ if(!$id){
 }
 else{
     //INITIATE A NEW MODEL, GET USER INPUT AND INITIALIZE AN EMPTY DATA ARRAY
-    $task1 = new Task();
-    $task1->id = $id;
+    $archive1 = new Archive();
+    $archive1->id = $id;
     $input = json_decode(file_get_contents('php://input'));
     $data = array();
 
@@ -43,12 +43,12 @@ else{
 //        //IF DESCRIPTION ONLY
 //        elseif (array_key_exists("description",$data)){
 //
-//            $old_data = $task1->fetchOne();
+//            $old_data = $archive1->fetchOne();
 //            $slug = $data['description']. " " .$old_data->client_ref;
 //            $data['slug'] = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug)));
 //        }
 //        else{
-//            $old_data = $task1->fetchOne();
+//            $old_data = $archive1->fetchOne();
 //            $slug = $old_data->description. " " .$data['client_ref'];
 //            $data['slug'] = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug)));
 //        }
@@ -59,9 +59,9 @@ else{
     $data['modified_at'] = date('Y-m-d H:i:s');
 
     //EXECUTE UPDATE
-    if($task1->upateOne($data)){
+    if($archive1->upateOne($data)){
         //FETCH THE NEWLY CREATED DOCUMENT
-        $new_document = $task1->fetchOne();
+        $new_document = $archive1->fetchOne();
         //create response
         $res = new Response();
         $res->message = "Document successfully Updated";
@@ -72,7 +72,7 @@ else{
         $res->message = "Failed to update document";
 
         //create response
-        $res->error = $task1->error;
+        $res->error = $archive1->error;
     }
 }
 

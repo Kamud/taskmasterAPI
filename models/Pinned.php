@@ -158,21 +158,14 @@ class Pinned
     }
     public function deleteOne()
     {
-        $id_is_valid = $this->db->check_id($this->table,$this->id);
 
-        if(!$id_is_valid){
-            $this->error = "The requested Id ($this->id) is not valid";
-            return false;
-        }
+        $sql = "DELETE FROM  $this->table  WHERE _id = :id";
+        $this->db->query($sql);
+        $this->db->bind('id', $this->id);
 
-        else{
-            $sql = "DELETE FROM  $this->table  WHERE _id = :id";
-            $this->db->query($sql);
-            $this->db->bind('id', $this->id);
-            $this->db->execute();
-            return true;
-        }
+        return $this->db->execute();
     }
+
     public function deleteByResourceId($resource_id)
     {
         $sql = "DELETE FROM  $this->table  WHERE resource_id = :id";

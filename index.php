@@ -24,7 +24,8 @@ include_once './utilities/Response.php';
 //
 
 
-$format = '%d-%m-%Y';
-$date = '25-05-2012';
-$parsed = strtotime($date , $format);
-echo date('Y/m/d H:i:s', strtotime($parsed));
+$oldDate = '2021-04-01T09:55:20';
+$newDate = new DateTime($oldDate);
+$newDate->add(new DateInterval('P14D')); // P1D means a period of 1 day
+$fomattedDate = $newDate->format('Y-m-d h:i');
+echo $fomattedDate;
